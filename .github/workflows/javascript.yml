@@ -19,8 +19,6 @@ env:
   JF_PROJECT: end2end-demo
   JFROG_CLI_AVOID_NEW_VERSION_WARNING: "true"
   JFROG_CLI_BUILD_NAME: plusone-javascript
-  VERSION: 1.0.${{ github.run_number - 1 }}
-  JFROG_CLI_BUILD_NUMBER: 1.0.${{ github.run_number - 1 }}
   IMAGE_NAME: plusone-javascript
   ARTIFACTORY_REPO: tompazus.jfrog.io/docker-virtual
 
@@ -29,6 +27,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set version (semver 1.0.N from run number)
+        run: |
+          echo "VERSION=1.0.$((${{ github.run_number }} - 1))" >> $GITHUB_ENV
+          echo "JFROG_CLI_BUILD_NUMBER=1.0.$((${{ github.run_number }} - 1))" >> $GITHUB_ENV
 
       - name: Set up Node
         uses: actions/setup-node@v4
