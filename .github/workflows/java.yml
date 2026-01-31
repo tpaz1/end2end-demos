@@ -35,6 +35,12 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
+      # Maven 3.8.x avoids "prerequisitesCheckers is null" when jf mvn uses the build-info-extractor launcher (Maven 3.9+ triggers the bug)
+      - name: Set up Maven 3.8
+        uses: stCarolas/setup-maven@v5
+        with:
+          maven-version: 3.8.8
+
       - name: Set up JFrog CLI (OIDC or token)
         id: setup-jfrog-cli
         uses: jfrog/setup-jfrog-cli@v4
@@ -98,7 +104,8 @@ jobs:
         run: |
           IMAGE="${{ env.ARTIFACTORY_REPO }}/${{ env.IMAGE_NAME }}:${{ github.run_id }}"
           DIGEST=$(docker buildx imagetools inspect "$IMAGE" 2>&1 | grep -oE 'sha256:[a-f0-9]+' | head -1)
-          jf rt build-docker-create "$IMAGE@$DIGEST" docker-virtual \
+          echo "$IMAGE@$DIGEST" > /tmp/docker-image.txt
+          jf rt build-docker-create --image-file=/tmp/docker-image.txt docker-virtual \
             --build-name=${{ env.JFROG_CLI_BUILD_NAME }} \
             --build-number=${{ env.JFROG_CLI_BUILD_NUMBER }} \
             --project end2end-demos
