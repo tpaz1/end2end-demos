@@ -1,4 +1,4 @@
-# end2end-demos
+# end2end-demo
 
 Simple **plusone** API applications in Python, Go, Java, and JavaScript. Each app exposes `GET /plusone/<number>` and returns the number plus one (plain text). All dependencies are resolved through **JFrog Artifactory** at `tompazus.jfrog.io`.
 

@@ -16,7 +16,7 @@ permissions:
 
 env:
   JF_URL: ${{ vars.JF_URL }}
-  JF_PROJECT: end2end-demos
+  JF_PROJECT: end2end-demo
   JFROG_CLI_AVOID_NEW_VERSION_WARNING: "true"
   JFROG_CLI_BUILD_NAME: plusone-go
   JFROG_CLI_BUILD_NUMBER: ${{ github.run_id }}
@@ -38,7 +38,7 @@ jobs:
         id: setup-jfrog-cli
         uses: jfrog/setup-jfrog-cli@v4
         with:
-          oidc-provider-name: tpaz1/end2end-demos@github
+          oidc-provider-name: tpaz1/end2end-demo@github
         env:
           JF_URL: ${{ vars.JF_URL }}
           JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
@@ -72,7 +72,7 @@ jobs:
       - name: Capture Go dependencies (for build info)
         run: |
           cd Go
-          jf go build --build-name=${{ env.JFROG_CLI_BUILD_NAME }} --build-number=${{ env.JFROG_CLI_BUILD_NUMBER }} --project end2end-demos
+          jf go build --build-name=${{ env.JFROG_CLI_BUILD_NAME }} --build-number=${{ env.JFROG_CLI_BUILD_NUMBER }} --project end2end-demo
         env:
           GOPROXY: ${{ vars.JF_URL }}/artifactory/api/go/go-virtual
 
@@ -102,13 +102,13 @@ jobs:
           jf rt build-docker-create --image-file=/tmp/docker-image.txt docker-virtual \
             --build-name=${{ env.JFROG_CLI_BUILD_NAME }} \
             --build-number=${{ env.JFROG_CLI_BUILD_NUMBER }} \
-            --project end2end-demos
+            --project end2end-demo
 
       - name: Publish build info (git, env, publish)
         run: |
-          jf rt build-collect-env --project end2end-demos
-          jf rt build-add-git --project end2end-demos
-          jf rt build-publish --project end2end-demos
+          jf rt build-collect-env --project end2end-demo
+          jf rt build-add-git --project end2end-demo
+          jf rt build-publish --project end2end-demo
         env:
           JFROG_CLI_BUILD_NAME: ${{ env.JFROG_CLI_BUILD_NAME }}
           JFROG_CLI_BUILD_NUMBER: ${{ env.JFROG_CLI_BUILD_NUMBER }}
