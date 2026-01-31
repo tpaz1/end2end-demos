@@ -16,6 +16,8 @@ permissions:
 
 env:
   JF_URL: ${{ vars.JF_URL }}
+  JF_PROJECT: end2end-demos
+  JFROG_CLI_AVOID_NEW_VERSION_WARNING: "true"
   JFROG_CLI_BUILD_NAME: plusone-javascript
   JFROG_CLI_BUILD_NUMBER: ${{ github.run_id }}
   IMAGE_NAME: plusone-javascript
@@ -36,7 +38,7 @@ jobs:
         id: setup-jfrog-cli
         uses: jfrog/setup-jfrog-cli@v4
         with:
-          oidc-provider-name: ${{ vars.JF_OIDC_PROVIDER_NAME }}
+          oidc-provider-name: tpaz1/end2end-demos@github
         env:
           JF_URL: ${{ vars.JF_URL }}
           JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
@@ -57,10 +59,15 @@ jobs:
           SECRET_USER: ${{ secrets.JF_USER }}
           SECRET_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
 
+      - name: Configure npm for Artifactory
+        run: |
+          cd Javascript
+          jf npm-config --repo-resolve=npm-virtual
+
       - name: Capture npm dependencies (for build info)
         run: |
           cd Javascript
-          jf npm install --build-name=${{ env.JFROG_CLI_BUILD_NAME }} --build-number=${{ env.JFROG_CLI_BUILD_NUMBER }}
+          jf npm install --build-name=${{ env.JFROG_CLI_BUILD_NAME }} --build-number=${{ env.JFROG_CLI_BUILD_NUMBER }} --project end2end-demos
         env:
           JF_NPM_REPO_RESOLVE: npm-virtual
 
@@ -88,13 +95,14 @@ jobs:
           DIGEST=$(docker buildx imagetools inspect "$IMAGE" --format '{{.Digest}}')
           jf rt build-docker-create "$IMAGE@$DIGEST" docker-virtual \
             --build-name=${{ env.JFROG_CLI_BUILD_NAME }} \
-            --build-number=${{ env.JFROG_CLI_BUILD_NUMBER }}
+            --build-number=${{ env.JFROG_CLI_BUILD_NUMBER }} \
+            --project end2end-demos
 
       - name: Publish build info (git, env, publish)
         run: |
-          jf rt build-collect-env
-          jf rt build-add-git
-          jf rt build-publish
+          jf rt build-collect-env --project end2end-demos
+          jf rt build-add-git --project end2end-demos
+          jf rt build-publish --project end2end-demos
         env:
           JFROG_CLI_BUILD_NAME: ${{ env.JFROG_CLI_BUILD_NAME }}
           JFROG_CLI_BUILD_NUMBER: ${{ env.JFROG_CLI_BUILD_NUMBER }}
