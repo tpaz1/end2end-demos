@@ -90,7 +90,7 @@ jobs:
       - name: Add image to build info
         run: |
           IMAGE="${{ env.ARTIFACTORY_REPO }}/${{ env.IMAGE_NAME }}:${{ github.run_id }}"
-          DIGEST=$(docker buildx imagetools inspect "$IMAGE" --format '{{.Digest}}')
+          DIGEST=$(docker buildx imagetools inspect "$IMAGE" 2>&1 | grep -oE 'sha256:[a-f0-9]+' | head -1)
           jf rt build-docker-create "$IMAGE@$DIGEST" docker-virtual \
             --build-name=${{ env.JFROG_CLI_BUILD_NAME }} \
             --build-number=${{ env.JFROG_CLI_BUILD_NUMBER }} \
