@@ -45,7 +45,7 @@ jobs:
         id: setup-jfrog-cli
         uses: jfrog/setup-jfrog-cli@v4
         with:
-          oidc-provider-name: tpaz1/end2end-demo@github
+          oidc-provider-name: tpaz1/end2end-demos@github
         env:
           JF_URL: ${{ vars.JF_URL }}
           JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
