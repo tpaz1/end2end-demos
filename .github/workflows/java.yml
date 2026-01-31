@@ -89,6 +89,22 @@ jobs:
         run: |
           echo "${{ env.ARTIFACTORY_TOKEN }}" | docker login ${{ vars.ARTIFACTORY_DOMAIN || 'tompazus.jfrog.io' }} -u "${{ env.ARTIFACTORY_USER }}" --password-stdin
 
+      - name: Build image (load locally for scan)
+        run: |
+          IMAGE="${{ env.ARTIFACTORY_REPO }}/${{ env.IMAGE_NAME }}:${{ github.run_id }}"
+          docker buildx build \
+            --platform linux/amd64 \
+            --load \
+            --build-arg ARTIFACTORY_USER=${{ env.ARTIFACTORY_USER }} \
+            --build-arg ARTIFACTORY_TOKEN=${{ env.ARTIFACTORY_TOKEN }} \
+            -t "$IMAGE" \
+            ./Java
+
+      - name: Docker image scan (Xray)
+        run: |
+          IMAGE="${{ env.ARTIFACTORY_REPO }}/${{ env.IMAGE_NAME }}:${{ github.run_id }}"
+          jf docker scan "$IMAGE" --project end2end-demo
+
       - name: Build and push multi-platform image (amd64 + arm64)
         run: |
           IMAGE="${{ env.ARTIFACTORY_REPO }}/${{ env.IMAGE_NAME }}:${{ github.run_id }}"
