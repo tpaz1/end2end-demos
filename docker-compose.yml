@@ -1,0 +1,54 @@
+# Build and run all plusone apps: docker-compose up -d --build
+#
+# Env vars for build args: Compose does NOT add them automatically.
+# Either:
+#   1. Put ARTIFACTORY_USER and ARTIFACTORY_TOKEN in a .env file in this directory
+#      (Compose loads .env automatically when you run from here), or
+#   2. Export them in your shell before running: export ARTIFACTORY_USER=... ARTIFACTORY_TOKEN=...
+#
+# Also run once: docker login tompazus.jfrog.io
+
+services:
+  python:
+    build:
+      context: ./Python
+      dockerfile: Dockerfile
+      args:
+        ARTIFACTORY_USER: ${ARTIFACTORY_USER}
+        ARTIFACTORY_TOKEN: ${ARTIFACTORY_TOKEN}
+    ports:
+      - "5004:5000"
+    restart: unless-stopped
+
+  go:
+    build:
+      context: ./Go
+      dockerfile: Dockerfile
+      args:
+        ARTIFACTORY_USER: ${ARTIFACTORY_USER}
+        ARTIFACTORY_TOKEN: ${ARTIFACTORY_TOKEN}
+    ports:
+      - "5001:5000"
+    restart: unless-stopped
+
+  java:
+    build:
+      context: ./Java
+      dockerfile: Dockerfile
+      args:
+        ARTIFACTORY_USER: ${ARTIFACTORY_USER}
+        ARTIFACTORY_TOKEN: ${ARTIFACTORY_TOKEN}
+    ports:
+      - "5002:5000"
+    restart: unless-stopped
+
+  javascript:
+    build:
+      context: ./Javascript
+      dockerfile: Dockerfile
+      args:
+        ARTIFACTORY_USER: ${ARTIFACTORY_USER}
+        ARTIFACTORY_TOKEN: ${ARTIFACTORY_TOKEN}
+    ports:
+      - "5003:5000"
+    restart: unless-stopped

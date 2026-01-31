@@ -1,0 +1,104 @@
+# Java plusone: OIDC + JFrog CLI (mvn + docker), build info with deps + image
+# OIDC: set vars.JF_URL and vars.JF_OIDC_PROVIDER_NAME; setup-jfrog-cli provides oidc-user and oidc-token for Docker
+# Fallback (no OIDC): set secrets.JF_USER and secrets.JF_ACCESS_TOKEN
+
+name: Java
+
+on:
+  push:
+    branches: [main]
+    paths: ['Java/**', '.github/workflows/java.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  JF_URL: ${{ vars.JF_URL }}
+  JFROG_CLI_BUILD_NAME: plusone-java
+  JFROG_CLI_BUILD_NUMBER: ${{ github.run_id }}
+  IMAGE_NAME: plusone-java
+  ARTIFACTORY_REPO: tompazus.jfrog.io/docker-virtual
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Set up JFrog CLI (OIDC or token)
+        id: setup-jfrog-cli
+        uses: jfrog/setup-jfrog-cli@v4
+        with:
+          oidc-provider-name: ${{ vars.JF_OIDC_PROVIDER_NAME }}
+        env:
+          JF_URL: ${{ vars.JF_URL }}
+          JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
+          JF_USER: ${{ secrets.JF_USER }}
+
+      - name: Set auth for Docker (OIDC token or fallback to secrets)
+        run: |
+          if [ -n "$OIDC_USER" ]; then
+            echo "ARTIFACTORY_USER=$OIDC_USER" >> $GITHUB_ENV
+            echo "ARTIFACTORY_TOKEN=$OIDC_TOKEN" >> $GITHUB_ENV
+          else
+            echo "ARTIFACTORY_USER=$SECRET_USER" >> $GITHUB_ENV
+            echo "ARTIFACTORY_TOKEN=$SECRET_TOKEN" >> $GITHUB_ENV
+          fi
+        env:
+          OIDC_USER: ${{ steps.setup-jfrog-cli.outputs.oidc-user }}
+          OIDC_TOKEN: ${{ steps.setup-jfrog-cli.outputs.oidc-token }}
+          SECRET_USER: ${{ secrets.JF_USER }}
+          SECRET_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
+
+      - name: Capture Maven dependencies (for build info)
+        run: |
+          cd Java
+          jf mvn dependency:go-offline package -DskipTests -B -s settings.xml \
+            --build-name=${{ env.JFROG_CLI_BUILD_NAME }} \
+            --build-number=${{ env.JFROG_CLI_BUILD_NUMBER }}
+        env:
+          ARTIFACTORY_USER: ${{ env.ARTIFACTORY_USER }}
+          ARTIFACTORY_TOKEN: ${{ env.ARTIFACTORY_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker login (Artifactory)
+        run: |
+          echo "${{ env.ARTIFACTORY_TOKEN }}" | docker login ${{ vars.ARTIFACTORY_DOMAIN || 'tompazus.jfrog.io' }} -u "${{ env.ARTIFACTORY_USER }}" --password-stdin
+
+      - name: Build and push multi-platform image (amd64 + arm64)
+        run: |
+          IMAGE="${{ env.ARTIFACTORY_REPO }}/${{ env.IMAGE_NAME }}:${{ github.run_id }}"
+          docker buildx build \
+            --platform linux/amd64,linux/arm64 \
+            --push \
+            --build-arg ARTIFACTORY_USER=${{ env.ARTIFACTORY_USER }} \
+            --build-arg ARTIFACTORY_TOKEN=${{ env.ARTIFACTORY_TOKEN }} \
+            -t "$IMAGE" \
+            ./Java
+
+      - name: Add image to build info
+        run: |
+          IMAGE="${{ env.ARTIFACTORY_REPO }}/${{ env.IMAGE_NAME }}:${{ github.run_id }}"
+          DIGEST=$(docker buildx imagetools inspect "$IMAGE" --format '{{.Digest}}')
+          jf rt build-docker-create "$IMAGE@$DIGEST" docker-virtual \
+            --build-name=${{ env.JFROG_CLI_BUILD_NAME }} \
+            --build-number=${{ env.JFROG_CLI_BUILD_NUMBER }}
+
+      - name: Publish build info (git, env, publish)
+        run: |
+          jf rt build-collect-env
+          jf rt build-add-git
+          jf rt build-publish
+        env:
+          JFROG_CLI_BUILD_NAME: ${{ env.JFROG_CLI_BUILD_NAME }}
+          JFROG_CLI_BUILD_NUMBER: ${{ env.JFROG_CLI_BUILD_NUMBER }}

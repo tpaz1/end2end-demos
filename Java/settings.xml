@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Maven settings for JFrog Artifactory (mvn-virtual).
+  In Docker build, this file is generated with ARTIFACTORY_USER and ARTIFACTORY_TOKEN.
+  For local build, copy to ~/.m2/settings.xml or use -s settings.xml
+-->
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
+    <servers>
+        <server>
+            <id>jfrog-mvn-virtual</id>
+            <username>${env.ARTIFACTORY_USER}</username>
+            <password>${env.ARTIFACTORY_TOKEN}</password>
+        </server>
+    </servers>
+    <mirrors>
+        <mirror>
+            <id>jfrog-mvn-virtual</id>
+            <mirrorOf>*</mirrorOf>
+            <url>https://tompazus.jfrog.io/artifactory/mvn-virtual</url>
+        </mirror>
+    </mirrors>
+    <profiles>
+        <profile>
+            <id>jfrog</id>
+            <repositories>
+                <repository>
+                    <id>jfrog-mvn-virtual</id>
+                    <url>https://tompazus.jfrog.io/artifactory/mvn-virtual</url>
+                    <releases><enabled>true</enabled></releases>
+                    <snapshots><enabled>true</enabled></snapshots>
+                </repository>
+            </repositories>
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>jfrog-mvn-virtual</id>
+                    <url>https://tompazus.jfrog.io/artifactory/mvn-virtual</url>
+                    <releases><enabled>true</enabled></releases>
+                    <snapshots><enabled>true</enabled></snapshots>
+                </pluginRepository>
+            </pluginRepositories>
+        </profile>
+    </profiles>
+    <activeProfiles>
+        <activeProfile>jfrog</activeProfile>
+    </activeProfiles>
+</settings>
