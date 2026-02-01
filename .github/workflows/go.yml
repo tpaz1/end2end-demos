@@ -21,6 +21,7 @@ env:
   JFROG_CLI_BUILD_NAME: plusone-go
   IMAGE_NAME: plusone-go
   ARTIFACTORY_REPO: tompazus.jfrog.io/docker-virtual
+  BUILD_INFO_REPO_KEY: ${{ format('{0}-build-info', env.JF_PROJECT) }}
 
 jobs:
   build:
@@ -136,3 +137,22 @@ jobs:
       - name: Build scan (Xray)
         run: |
           jf build-scan ${{ env.JFROG_CLI_BUILD_NAME }} ${{ env.JFROG_CLI_BUILD_NUMBER }} --project end2end-demo
+
+      - name: Create bundle spec
+        env:
+          BUILD_NAME: ${{ env.JFROG_CLI_BUILD_NAME }}
+          BUILD_VERSION: ${{ env.VERSION }}
+          BUILD_INFO_REPO_KEY: ${{ env.BUILD_INFO_REPO_KEY }}
+        run: |
+          cat > bundle-spec.json <<EOF
+          {
+            "builds": [
+              {
+                "name": "${BUILD_NAME}",
+                "number": "${BUILD_VERSION}",
+                "repository_key": "${BUILD_INFO_REPO_KEY}",
+                "include_dependencies": true
+              }
+            ]
+          }
+          EOF
