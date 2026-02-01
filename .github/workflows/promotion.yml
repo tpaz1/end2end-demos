@@ -17,9 +17,15 @@ on:
         required: true
         type: string
       target_stage:
-        description: 'Target stage (e.g. staging, production)'
+        description: 'Target stage'
         required: true
-        type: string
+        type: choice
+        default: DEV
+        options:
+          - DEV
+          - QA
+          - TEST
+          - PROD
 
 permissions:
   contents: read
