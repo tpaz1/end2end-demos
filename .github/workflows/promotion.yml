@@ -1,0 +1,51 @@
+# Promotion: promote an AppTrust application version to a target stage.
+# Trigger 1: Manually from Actions tab with inputs (app_name, version, target_stage).
+# Trigger 2: Dispatched by each app pipeline after version creation (promotion job waits for manual approval).
+# Requires: GitHub Environment "promotion-approval" with required reviewers (Settings -> Environments).
+
+name: Promotion
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_name:
+        description: 'Application key (e.g. python, go, java, javascript)'
+        required: true
+        type: string
+      version:
+        description: 'Version to promote (e.g. 1.0.9)'
+        required: true
+        type: string
+      target_stage:
+        description: 'Target stage (e.g. staging, production)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  JF_URL: ${{ vars.JF_URL }}
+  JFROG_CLI_AVOID_NEW_VERSION_WARNING: "true"
+
+jobs:
+  promote:
+    name: Promote to ${{ inputs.target_stage }}
+    runs-on: ubuntu-latest
+    environment: promotion-approval
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JFrog CLI (OIDC or token)
+        uses: jfrog/setup-jfrog-cli@v4
+        with:
+          oidc-provider-name: tpaz1/end2end-demos@github
+        env:
+          JF_URL: ${{ vars.JF_URL }}
+          JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
+          JF_USER: ${{ secrets.JF_USER }}
+
+      - name: Promote application version
+        run: |
+          jf apptrust version-promote "${{ inputs.app_name }}" "${{ inputs.version }}" "${{ inputs.target_stage }}"

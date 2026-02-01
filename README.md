@@ -119,6 +119,20 @@ Each workflow runs **only** when:
 
 So a change only under `Python/` runs the Python pipeline; a change only under `Go/` runs the Go pipeline, and so on. Workflows can also be run manually via **Run workflow** (`workflow_dispatch`).
 
+### Promotion workflow (AppTrust)
+
+The **Promotion** workflow (`.github/workflows/promotion.yml`) promotes an AppTrust application version to a target stage via `jf apptrust version-promote`.
+
+- **Trigger 1 – Manual:** In the Actions tab, select **Promotion**, click **Run workflow**, then choose branch and fill in **app_name**, **version**, and **target_stage**.
+- **Trigger 2 – From app pipelines:** Each app workflow (Python, Go, Java, JavaScript) dispatches the Promotion workflow at the end (after version creation), passing its app name, version, and default target stage `staging`.
+
+The promotion job uses the GitHub **environment** `promotion-approval`, so it **waits for manual approval** before running. Create the environment and add required reviewers:
+
+1. Repo **Settings** → **Environments** → **New environment** → name: `promotion-approval`.
+2. Under **Required reviewers**, add who must approve before the promote step runs.
+
+Until approval, the promotion run stays in a “waiting” state; after approval it runs `jf apptrust version-promote` with the provided inputs.
+
 ## Repository mapping
 
 | Language   | Package repo   | Docker base images |
