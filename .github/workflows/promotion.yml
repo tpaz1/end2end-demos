@@ -5,6 +5,8 @@
 
 name: Promotion
 
+run-name: Promote ${{ inputs.app_name }} ${{ inputs.version }} → ${{ inputs.target_stage }}
+
 on:
   workflow_dispatch:
     inputs:
@@ -37,7 +39,7 @@ env:
 
 jobs:
   promote:
-    name: Promote to ${{ inputs.target_stage }}
+    name: "Promote Application: ${{ inputs.app_name }} Version: ${{ inputs.version }} → Target Stage: ${{ inputs.target_stage }}"
     runs-on: ubuntu-latest
     environment: promotion-approval
     steps:
