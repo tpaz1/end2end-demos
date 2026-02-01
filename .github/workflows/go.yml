@@ -19,6 +19,7 @@ env:
   JF_PROJECT: end2end-demo
   JFROG_CLI_AVOID_NEW_VERSION_WARNING: "true"
   JFROG_CLI_BUILD_NAME: plusone-go
+  APP_NAME: plusone-go
   IMAGE_NAME: plusone-go
   ARTIFACTORY_REPO: tompazus.jfrog.io/docker-virtual
   BUILD_INFO_REPO_KEY: ${{ format('{0}-build-info', env.JF_PROJECT) }}
@@ -143,6 +144,7 @@ jobs:
           BUILD_NAME: ${{ env.JFROG_CLI_BUILD_NAME }}
           BUILD_VERSION: ${{ env.VERSION }}
           BUILD_INFO_REPO_KEY: ${{ env.BUILD_INFO_REPO_KEY }}
+          APP_NAME: ${{ env.APP_NAME }}
         run: |
           cat > bundle-spec.json <<EOF
           {
@@ -156,3 +158,4 @@ jobs:
             ]
           }
           EOF
+          jf apptrust version-create "${APP_NAME}" "${BUILD_VERSION}" --spec=bundle-spec.json --tag="${APP_NAME}"
