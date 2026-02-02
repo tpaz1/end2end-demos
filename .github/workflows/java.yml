@@ -145,6 +145,7 @@ jobs:
         run: |
           jf build-scan ${{ env.JFROG_CLI_BUILD_NAME }} ${{ env.JFROG_CLI_BUILD_NUMBER }} --project end2end-demo
 
+      # Use include_dependencies: false for Java to avoid AppTrust 500 when processing large Maven dependency sets
       - name: Create bundle spec
         env:
           BUILD_NAME: ${{ env.JFROG_CLI_BUILD_NAME }}
@@ -159,7 +160,7 @@ jobs:
                 "name": "${BUILD_NAME}",
                 "number": "${BUILD_VERSION}",
                 "repository_key": "${BUILD_INFO_REPO_KEY}",
-                "include_dependencies": true
+                "include_dependencies": false
               }
             ]
           }
