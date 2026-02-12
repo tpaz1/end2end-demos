@@ -136,7 +136,7 @@ jobs:
 
       - name: Build scan (Xray)
         run: |
-          jf build-scan ${{ env.JFROG_CLI_BUILD_NAME }} ${{ env.JFROG_CLI_BUILD_NUMBER }} --project end2end-demo
+          jf build-scan ${{ env.JFROG_CLI_BUILD_NAME }} ${{ env.JFROG_CLI_BUILD_NUMBER }} --project end2end-demo --vuln
 
       - name: Create bundle spec
         env:

@@ -147,7 +147,7 @@ jobs:
 
       - name: Build scan (Xray)
         run: |
-          jf build-scan ${{ env.JFROG_CLI_BUILD_NAME }} ${{ env.JFROG_CLI_BUILD_NUMBER }} --project end2end-demo
+          jf build-scan ${{ env.JFROG_CLI_BUILD_NAME }} ${{ env.JFROG_CLI_BUILD_NUMBER }} --project end2end-demo --vuln
 
       # Use include_dependencies: false for Java to avoid AppTrust 500 when processing large Maven dependency sets
       - name: Create bundle spec
