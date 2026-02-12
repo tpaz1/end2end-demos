@@ -8,13 +8,17 @@ ARG ARTIFACTORY_TOKEN
 WORKDIR /app
 
 COPY go.mod go.sum* ./
-COPY app.go .
+COPY app.go ./
+COPY static/ ./static/
 
 # Resolve all Go dependencies through JFrog go-virtual (go mod tidy populates go.sum)
 ENV GOPROXY="https://${ARTIFACTORY_USER}:${ARTIFACTORY_TOKEN}@tompazus.jfrog.io/artifactory/api/go/go-virtual"
 RUN go mod tidy && go build -o plusone .
 
 FROM tompazus.jfrog.io/docker-virtual/library/alpine:3.19
+
+ARG VERSION=1.0.0
+ENV APP_VERSION=$VERSION
 
 WORKDIR /app
 

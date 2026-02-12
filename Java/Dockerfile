@@ -23,6 +23,9 @@ RUN mvn -s settings.xml package -DskipTests -B
 
 FROM tompazus.jfrog.io/docker-virtual/library/eclipse-temurin:21-jre-alpine
 
+ARG VERSION=1.0.0
+ENV APP_VERSION=$VERSION
+
 WORKDIR /app
 
 COPY --from=builder /app/target/plusone-app-1.0.0.jar app.jar

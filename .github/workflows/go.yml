@@ -13,6 +13,8 @@ on:
 permissions:
   contents: read
   id-token: write
+  # Required for JFrog to send scan results (e.g. build-scan, docker scan) to GitHub job summary and Code Scanning
+  security-events: write
 
 env:
   JF_URL: ${{ vars.JF_URL }}
@@ -49,6 +51,8 @@ jobs:
           JF_URL: ${{ vars.JF_URL }}
           JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
           JF_USER: ${{ secrets.JF_USER }}
+          # Enables security issues from build-scan / docker scan in GitHub Actions job summary and Code Scanning tab
+          JF_GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set auth for Docker (OIDC token or fallback to secrets)
         run: |
@@ -97,6 +101,7 @@ jobs:
             --load \
             --build-arg ARTIFACTORY_USER=${{ env.ARTIFACTORY_USER }} \
             --build-arg ARTIFACTORY_TOKEN=${{ env.ARTIFACTORY_TOKEN }} \
+            --build-arg VERSION=${{ env.VERSION }} \
             -t "$IMAGE" \
             ./Go
 
@@ -113,6 +118,7 @@ jobs:
             --push \
             --build-arg ARTIFACTORY_USER=${{ env.ARTIFACTORY_USER }} \
             --build-arg ARTIFACTORY_TOKEN=${{ env.ARTIFACTORY_TOKEN }} \
+            --build-arg VERSION=${{ env.VERSION }} \
             -t "$IMAGE" \
             ./Go
 

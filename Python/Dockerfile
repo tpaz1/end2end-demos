@@ -5,9 +5,12 @@ FROM tompazus.jfrog.io/docker-virtual/library/python:3.12-slim
 # JFrog Artifactory credentials for resolving Python deps from python-virtual
 ARG ARTIFACTORY_USER
 ARG ARTIFACTORY_TOKEN
+ARG VERSION=1.0.0
+ENV APP_VERSION=$VERSION
 
 COPY requirements.txt .
-COPY app.py .
+COPY app.py ./
+COPY static/ ./static/
 
 # Resolve all Python dependencies through JFrog python-virtual
 RUN pip install --no-cache-dir \

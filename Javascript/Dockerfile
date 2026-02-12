@@ -17,7 +17,11 @@ RUN echo "registry=https://tompazus.jfrog.io/artifactory/api/npm/npm-virtual/" >
     npm install && \
     rm -f .npmrc
 
-COPY app.js .
+ARG VERSION=1.0.0
+ENV APP_VERSION=$VERSION
+
+COPY app.js ./
+COPY static/ ./static/
 
 EXPOSE 5000
 
