@@ -48,3 +48,8 @@ jobs:
           JF_PROJECT: end2end-demo
           JF_GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JF_GIT_BASE_BRANCH: ${{ matrix.branch }}
+          # Uncomment to see why no fix PR was created (fixable vulns? push failed?)
+          JFROG_CLI_LOG_LEVEL: DEBUG
+          JF_PULL_REQUEST_TITLE_TEMPLATE: "[🐸 Frogbot-Automatic PR] Upgrade ${IMPACTED_PACKAGE} to ${FIX_VERSION}"
+          JF_GIT_AGGREGATE_FIXES: "FALSE"
+

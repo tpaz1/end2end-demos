@@ -1,9 +1,13 @@
 # Restrict Frogbot to scan only the Javascript app (npm).
 # Root must be a list (one entry per repo/params); see RepoAggregator in Frogbot.
 # No watch: Xray reports all vulnerabilities and security issues.
+# git.branches: repo scan creates fix PRs targeting these branches (e.g. main).
 # See: https://jfrog.com/help/r/jfrog-security-user-guide/developers/frogbot/configure-frogbot/the-frogbot-config.yml-file-structure
 
 - params:
+    git:
+      branches:
+        - main
     scan:
       projects:
         - workingDirs:
