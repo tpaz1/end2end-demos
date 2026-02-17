@@ -5,6 +5,7 @@
 # OIDC: same provider as other workflows (tpaz1/end2end-demos@github)
 # Auto PRs: Frogbot creates PRs for fixable vulnerabilities when JF_GIT_TOKEN has write access
 # No watch: all vulnerabilities and security issues are reported (JF_PROJECT is project context only).
+# JF_GIT_TOKEN: use GITHUB_TOKEN so dependency-graph (SBOM) upload works; or use a PAT with repo scope.
 
 name: "Frogbot Security Scan"
 
@@ -45,5 +46,5 @@ jobs:
         env:
           JF_URL: ${{ vars.JF_URL }}
           JF_PROJECT: end2end-demo
-          JF_GIT_TOKEN: ${{ secrets.GT_TOKEN }}
+          JF_GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JF_GIT_BASE_BRANCH: ${{ matrix.branch }}
