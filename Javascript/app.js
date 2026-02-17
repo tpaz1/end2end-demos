@@ -1,9 +1,14 @@
 const express = require('express');
 const morgan = require('morgan');
+const lodash = require('lodash');
 
 const app = express();
 const PORT = 5000;
 const NAME = 'JavaScript';
+
+app.use(morgan('combined'));
+app.use(express.static('static'));
+app.use(express.json()); // allow JSON body input
 
 function getVersion() {
   return process.env.APP_VERSION || '1.0.0';
@@ -86,9 +91,6 @@ const INDEX_HTML_TEMPLATE = `<!DOCTYPE html>
 </html>
 `;
 
-app.use(morgan('combined'));
-app.use(express.static('static'));
-
 app.get('/', (req, res) => {
   res.set('Content-Type', 'text/html; charset=utf-8').send(getIndexHtml());
 });
@@ -104,6 +106,38 @@ app.get('/plusone/:number', (req, res) => {
   }
   const result = number + 1;
   res.set('Content-Type', 'text/plain; charset=utf-8').send(`${NAME} - ${result} - ${NAME}`);
+});
+
+
+/**
+ * Vulnerable route (intentionally)
+ * defaultsDeep(target, sources)
+ * sources is fully controlled by external input (req.body)
+ * and NO Object.freeze remediation is applied.
+ */
+app.post('/merge', (req, res) => {
+  const baseConfig = {
+    app: {
+      name: NAME,
+      version: getVersion()
+    }
+  };
+
+  const externalInput = req.body; // attacker-controlled input
+
+  // defaultsDeep called with external input as the 2nd argument (sources)
+  const merged = defaultsDeep(baseConfig, externalInput);
+
+  res.json({
+    mergedConfig: merged
+  });
+});
+
+app.post("/fear", (req, res) => {
+  let data = {};
+  let input = req.body.content;
+  lodash.defaultsDeep(data, input);
+  res.json({message: `default response message for an expected payload! - content is ${input}`});
 });
 
 app.listen(PORT, '0.0.0.0', () => {

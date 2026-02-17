@@ -1,0 +1,11 @@
+# Restrict Frogbot to scan only the Javascript app (npm).
+# No watch is configured: Xray reports all vulnerabilities and security issues (no policy filter).
+# JF_PROJECT in the workflow is for project context only; it does not limit which issues are reported.
+# See: https://jfrog.com/help/r/jfrog-security-user-guide/developers/frogbot/configure-frogbot/the-frogbot-config.yml-file-structure
+
+params:
+  scan:
+    projects:
+      - workingDirs:
+          - Javascript
+        installCommand: npm install
