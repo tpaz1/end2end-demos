@@ -67,3 +67,4 @@ jobs:
           JF_GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JF_DEPS_REPO: "npm-virtual"
           JF_FAIL: "FALSE"
+          JF_INCLUDE_ALL_VULNERABILITIES: "TRUE"
