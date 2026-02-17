@@ -1,15 +1,13 @@
-# Frogbot: security scans + auto fix PRs via JFrog Xray
-# Scope: scans only the Javascript directory (see .frogbot/frogbot-config.yml)
-# - PR scan: runs only when the PR changes files under Javascript/ or .frogbot/
-# - Repo scan: runs on push to main, daily at 00:00 UTC, and on workflow_dispatch
-# OIDC: same provider as other workflows (tpaz1/end2end-demos@github)
-# Auto PRs: Frogbot creates PRs for fixable vulnerabilities when JF_GIT_TOKEN has write access
-# No watch: all vulnerabilities and security issues are reported (JF_PROJECT is project context only).
-# JF_GIT_TOKEN: use GITHUB_TOKEN so dependency-graph (SBOM) upload works; or use a PAT with repo scope.
+# Frogbot: two jobs – repo scan (fix PRs) and PR scan (comment on PRs).
+# Scope: Javascript only (see .frogbot/frogbot-config.yml).
+# Auth: OIDC (same provider as other workflows).
 
 name: "Frogbot Security Scan"
 
 on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
   pull_request_target:
     types: [opened, synchronize]
     paths:
@@ -18,38 +16,54 @@ on:
   push:
     branches:
       - main
-  schedule:
-    - cron: "0 0 * * *"
-  workflow_dispatch:
 
 permissions:
-  pull-requests: write
   contents: write
+  pull-requests: write
   security-events: write
   id-token: write
 
 jobs:
-  frogbot-scan:
+  scan-repository:
     runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request_target'
     strategy:
       matrix:
         branch: ["main"]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.ref }}
+          ref: ${{ matrix.branch }}
 
       - uses: jfrog/frogbot@v2
         with:
           oidc-provider-name: tpaz1/end2end-demos@github
         env:
+          JF_CLI_LOG_LEVEL: "DEBUG"
           JF_URL: ${{ vars.JF_URL }}
           JF_PROJECT: end2end-demo
           JF_GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JF_GIT_BASE_BRANCH: ${{ matrix.branch }}
-          # Uncomment to see why no fix PR was created (fixable vulns? push failed?)
-          JFROG_CLI_LOG_LEVEL: DEBUG
+          JF_DEPS_REPO: "npm-virtual"
+          JF_FAIL: "FALSE"
           JF_PULL_REQUEST_TITLE_TEMPLATE: "[🐸 Frogbot-Automatic PR] Upgrade ${IMPACTED_PACKAGE} to ${FIX_VERSION}"
           JF_GIT_AGGREGATE_FIXES: "FALSE"
 
+  scan-pull-request:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request_target'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: jfrog/frogbot@v2
+        with:
+          oidc-provider-name: tpaz1/end2end-demos@github
+        env:
+          JF_CLI_LOG_LEVEL: "DEBUG"
+          JF_URL: ${{ vars.JF_URL }}
+          JF_PROJECT: end2end-demo
+          JF_GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JF_DEPS_REPO: "npm-virtual"
+          JF_FAIL: "FALSE"
