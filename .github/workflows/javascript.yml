@@ -107,17 +107,16 @@ jobs:
           jf docker scan "$IMAGE" --project end2end-demo
 
       - name: Build and push multi-platform image (amd64 + arm64)
-        id: build-and-push
-        uses: docker/build-push-action@v6
-        with:
-          context: ./Javascript
-          platforms: linux/amd64
-          push: true
-          tags: ${{ env.ARTIFACTORY_REPO }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
-          build-args: |
-            ARTIFACTORY_USER=${{ env.ARTIFACTORY_USER }}
-            ARTIFACTORY_TOKEN=${{ env.ARTIFACTORY_TOKEN }}
-            VERSION=${{ env.VERSION }}
+        run: |
+          IMAGE="${{ env.ARTIFACTORY_REPO }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}"
+          docker buildx build \
+            --platform linux/amd64,linux/arm64 \
+            --push \
+            --build-arg ARTIFACTORY_USER=${{ env.ARTIFACTORY_USER }} \
+            --build-arg ARTIFACTORY_TOKEN=${{ env.ARTIFACTORY_TOKEN }} \
+            --build-arg VERSION=${{ env.VERSION }} \
+            -t "$IMAGE" \
+            ./Javascript
 
       - name: Attest Docker Image with Build Provenance
         uses: actions/attest-build-provenance@v3
