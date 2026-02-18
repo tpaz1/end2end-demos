@@ -22,7 +22,7 @@ env:
   JFROG_CLI_BUILD_NAME: plusone-java
   APP_NAME: plusone-java
   IMAGE_NAME: plusone-java
-  ARTIFACTORY_REPO: tompazus.jfrog.io/docker-virtual
+  ARTIFACTORY_REPO: tompazus.jfrog.io/end2end-demo-docker-dev-local
 
 jobs:
   build:
@@ -131,7 +131,7 @@ jobs:
           IMAGE="${{ env.ARTIFACTORY_REPO }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}"
           DIGEST=$(docker buildx imagetools inspect "$IMAGE" 2>&1 | grep -oE 'sha256:[a-f0-9]+' | head -1)
           echo "$IMAGE@$DIGEST" > /tmp/docker-image.txt
-          jf rt build-docker-create --image-file=/tmp/docker-image.txt docker-virtual \
+          jf rt build-docker-create --image-file=/tmp/docker-image.txt end2end-demo-docker-dev-local \
             --build-name=${{ env.JFROG_CLI_BUILD_NAME }} \
             --build-number=${{ env.JFROG_CLI_BUILD_NUMBER }} \
             --project end2end-demo

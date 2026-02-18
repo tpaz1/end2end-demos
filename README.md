@@ -7,7 +7,7 @@ Simple **plusone** API applications in Python, Go, Java, and JavaScript. Each ap
 All apps are configured to pull:
 
 - **Package dependencies** from your Artifactory virtual repos (pip, Go modules, Maven, npm).
-- **Docker base images** from `docker-virtual` (e.g. `tompazus.jfrog.io/docker-virtual/...`).
+- **Docker base images** from `end2end-demo-docker-dev-local` (e.g. `tompazus.jfrog.io/end2end-demo-docker-dev-local/...`).
 
 ### 1. Create an identity token (or API key)
 
@@ -40,19 +40,19 @@ export ARTIFACTORY_TOKEN=<your-token-or-api-key>
 Then build, for example:
 
 ```bash
-# Python (python-virtual, docker-virtual)
+# Python (python-virtual, end2end-demo-docker-dev-local)
 docker build --build-arg ARTIFACTORY_USER --build-arg ARTIFACTORY_TOKEN -t plusone-python ./Python
 docker run -p 5000:5000 plusone-python
 
-# Go (go-virtual, docker-virtual)
+# Go (go-virtual, end2end-demo-docker-dev-local)
 docker build --build-arg ARTIFACTORY_USER --build-arg ARTIFACTORY_TOKEN -t plusone-go ./Go
 docker run -p 5000:5000 plusone-go
 
-# Java (mvn-virtual, docker-virtual)
+# Java (mvn-virtual, end2end-demo-docker-dev-local)
 docker build --build-arg ARTIFACTORY_USER --build-arg ARTIFACTORY_TOKEN -t plusone-java ./Java
 docker run -p 5000:5000 plusone-java
 
-# JavaScript (npm-virtual, docker-virtual)
+# JavaScript (npm-virtual, end2end-demo-docker-dev-local)
 docker build --build-arg ARTIFACTORY_USER --build-arg ARTIFACTORY_TOKEN -t plusone-js ./Javascript
 docker run -p 5000:5000 plusone-js
 ```
@@ -87,7 +87,7 @@ Stop everything: `docker-compose down`.
 
 ### Why builds can be slow
 
-- **First run** – Four images are built and all dependencies are downloaded from Artifactory (and base images from docker-virtual). That’s a lot of network I/O.
+- **First run** – Four images are built and all dependencies are downloaded from Artifactory (and base images from end2end-demo-docker-dev-local). That’s a lot of network I/O.
 - **Java** – Spring Boot pulls a large dependency tree (dozens of BOMs and hundreds of artifacts). Maven `dependency:go-offline` plus `package` often takes several minutes.
 - **Cache** – Docker reuses layers when the Dockerfile and inputs (e.g. `pom.xml`, `package.json`, `go.mod`, `requirements.txt`) are unchanged. **If you change `ARTIFACTORY_USER` or `ARTIFACTORY_TOKEN` in `.env`, every image’s dependency layer is invalidated** and pip/go/mvn/npm run again.
 - **Tips** – Keep `.env` stable between builds so dependency layers stay cached. After the first successful build, only change code (e.g. `app.js`, `app.go`); then only the final steps rebuild and it’s much faster. To rebuild a single app: `docker-compose build python` (or `go`, `java`, `javascript`).
@@ -137,10 +137,10 @@ Until approval, the promotion run stays in a “waiting” state; after approval
 
 | Language   | Package repo   | Docker base images |
 |-----------|----------------|--------------------|
-| Python    | python-virtual | docker-virtual     |
-| Go        | go-virtual     | docker-virtual     |
-| Java      | mvn-virtual    | docker-virtual     |
-| JavaScript| npm-virtual    | docker-virtual     |
+| Python    | python-virtual | end2end-demo-docker-dev-local     |
+| Go        | go-virtual     | end2end-demo-docker-dev-local     |
+| Java      | mvn-virtual    | end2end-demo-docker-dev-local     |
+| JavaScript| npm-virtual    | end2end-demo-docker-dev-local     |
 
 ## Per-app dependencies (all resolved via Artifactory)
 
