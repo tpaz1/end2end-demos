@@ -122,7 +122,7 @@ jobs:
       - name: Attest Docker Image with Build Provenance
         uses: actions/attest-build-provenance@v3
         with:
-          subject-name: ${{ env.ARTIFACTORY_REPO }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+          subject-name: ${{ env.ARTIFACTORY_REPO }}/${{ env.IMAGE_NAME }}
           subject-digest: ${{ steps.build-and-push.outputs.digest }}
 
       - name: Add image to build info
