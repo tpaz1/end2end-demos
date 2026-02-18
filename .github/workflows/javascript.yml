@@ -25,7 +25,7 @@ env:
   JFROG_CLI_BUILD_NAME: plusone-javascript
   APP_NAME: plusone-javascript
   IMAGE_NAME: plusone-javascript
-  ARTIFACTORY_REPO: tompazus.jfrog.io/end2end-docker-dev-local
+  ARTIFACTORY_REPO: tompazus.jfrog.io/end2end-demo-docker-dev-local
 
 jobs:
   build:
