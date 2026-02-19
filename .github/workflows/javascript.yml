@@ -156,6 +156,28 @@ jobs:
         run: |
           jf build-scan ${{ env.JFROG_CLI_BUILD_NAME }} ${{ env.JFROG_CLI_BUILD_NUMBER }} --project end2end-demo --vuln
 
+  # Second job runs after build job finishes. setup-jfrog-cli post-step in the build job
+  # creates evidence from attestation before this job runs, so the application version
+  # will include that evidence.
+  create-app-version:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Set version (semver 1.0.N from run number)
+        run: |
+          echo "VERSION=1.0.$((${{ github.run_number }} - 1))" >> $GITHUB_ENV
+          echo "BUILD_INFO_REPO_KEY=${{ env.JF_PROJECT }}-build-info" >> $GITHUB_ENV
+
+      - name: Set up JFrog CLI (OIDC or token)
+        uses: jfrog/setup-jfrog-cli@v4
+        with:
+          oidc-provider-name: tpaz1/end2end-demos@github
+        env:
+          JF_URL: ${{ vars.JF_URL }}
+          JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
+          JF_USER: ${{ secrets.JF_USER }}
+          JF_GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Create bundle spec
         env:
           BUILD_NAME: ${{ env.JFROG_CLI_BUILD_NAME }}
