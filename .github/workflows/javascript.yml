@@ -74,6 +74,10 @@ jobs:
         run: |
           cd Javascript
           jf npm-config --repo-resolve=npm-virtual
+      - name: Running jf curation-audit check
+        run: |
+          cd Javascript
+          jf curation-audit
 
       - name: Capture npm dependencies (for build info)
         run: |
