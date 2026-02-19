@@ -124,13 +124,6 @@ jobs:
           DIGEST=$(jq -r '.["containerimage.digest"]' build-metadata)
           echo "digest=$DIGEST" >> $GITHUB_OUTPUT
           echo "Extracted digest: $DIGEST"
-
-      - name: Attest Docker Image with Build Provenance
-        uses: actions/attest-build-provenance@v3
-        with:
-          subject-name: oci://${{ env.ARTIFACTORY_REPO }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
-          subject-digest: ${{ steps.build-and-push.outputs.digest }}
-
       - name: Add image to build info
         run: |
           IMAGE="${{ env.ARTIFACTORY_REPO }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}"
@@ -141,6 +134,11 @@ jobs:
             --build-number=${{ env.JFROG_CLI_BUILD_NUMBER }} \
             --project end2end-demo
 
+      - name: Attest Docker Image with Build Provenance
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-name: oci://${{ env.ARTIFACTORY_REPO }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+          subject-digest: ${{ steps.build-and-push.outputs.digest }}
       - name: Publish build info (git, env, publish)
         run: |
           jf rt build-collect-env --project end2end-demo
