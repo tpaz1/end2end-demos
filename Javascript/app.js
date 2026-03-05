@@ -2,6 +2,8 @@ const express = require('express');
 const morgan = require('morgan');
 const lodash = require('lodash');
 
+Object.freeze(Object.prototype);
+
 const app = express();
 const PORT = 5000;
 const NAME = 'JavaScript';
