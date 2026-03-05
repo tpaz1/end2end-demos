@@ -2,6 +2,9 @@ const express = require('express');
 const morgan = require('morgan');
 const lodash = require('lodash');
 
+// Mitigation for CVE-2019-10744: Prevent prototype pollution
+Object.freeze(Object.prototype);
+
 const app = express();
 const PORT = 5000;
 const NAME = 'JavaScript';
