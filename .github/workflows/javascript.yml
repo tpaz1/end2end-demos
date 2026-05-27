@@ -138,20 +138,6 @@ jobs:
             --build-number=${{ env.JFROG_CLI_BUILD_NUMBER }} \
             --project end2end-demo
 
-      - name: Attest Docker Image with Build Provenance
-        uses: actions/attest-build-provenance@v3
-        with:
-          subject-name: oci://${{ env.ARTIFACTORY_REPO }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
-          subject-digest: ${{ steps.build-and-push.outputs.digest }}
-      - name: Publish build info (git, env, publish)
-        run: |
-          jf rt build-collect-env --project end2end-demo
-          jf rt build-add-git --project end2end-demo
-          jf rt build-publish --project end2end-demo
-        env:
-          JFROG_CLI_BUILD_NAME: ${{ env.JFROG_CLI_BUILD_NAME }}
-          JFROG_CLI_BUILD_NUMBER: ${{ env.JFROG_CLI_BUILD_NUMBER }}
-
       - name: Build scan (Xray)
         run: |
           jf build-scan ${{ env.JFROG_CLI_BUILD_NAME }} ${{ env.JFROG_CLI_BUILD_NUMBER }} --project end2end-demo --vuln
